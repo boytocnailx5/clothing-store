@@ -1,8 +1,16 @@
-import { NavLink } from 'react-router-dom'
+import { NavLink, useNavigate } from 'react-router-dom'
 import { useCart } from '../contexts/useCart'
+import useAuth from '../contexts/useAuth'
 
 function Header() {
   const { cartCount } = useCart()
+  const { user, logout } = useAuth()
+  const navigate = useNavigate()
+
+  const handleLogout = () => {
+    logout()
+    navigate('/')
+  }
 
   return (
     <header className="site-header">
@@ -19,9 +27,21 @@ function Header() {
         </nav>
 
         <div className="header-actions">
-          <NavLink className="text-link" to="/login">
-            Đăng nhập
-          </NavLink>
+          {user ? (
+            <>
+              <span className="user-greeting">
+                Xin chào, <strong>{user.fullName || user.FullName || user.email}</strong>
+              </span>
+              <button className="text-link logout-btn" onClick={handleLogout}>
+                Đăng xuất
+              </button>
+            </>
+          ) : (
+            <>
+              <NavLink className="text-link" to="/login">Đăng nhập</NavLink>
+              <NavLink className="text-link" to="/register">Đăng ký</NavLink>
+            </>
+          )}
           <NavLink className="cart-link" to="/cart">
             Giỏ hàng <span>{cartCount}</span>
           </NavLink>

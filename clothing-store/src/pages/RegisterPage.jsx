@@ -1,21 +1,33 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
+import axiosClient from '../api/axiosClient'
 
 function RegisterPage() {
+  const navigate = useNavigate()
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
     phone: '',
     password: '',
   })
+  const [errorMsg, setErrorMsg] = useState('')
 
   const updateField = (event) => {
     setFormData({ ...formData, [event.target.name]: event.target.value })
   }
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault()
-    alert('Giao diện đã sẵn sàng. Bước sau sẽ kết nối API đăng ký Node.js.')
+    setErrorMsg('')
+    try {
+      const response = await axiosClient.post('/auth/register', formData)
+      if (response.data.success) {
+        alert('Đăng ký thành công! Hãy đăng nhập.')
+        navigate('/login')
+      }
+    } catch (error) {
+      setErrorMsg(error.response?.data?.message || 'Đã có lỗi xảy ra. Vui lòng thử lại.')
+    }
   }
 
   return (
@@ -24,6 +36,8 @@ function RegisterPage() {
         <p className="eyebrow">THÀNH VIÊN MỚI</p>
         <h1>Tạo tài khoản</h1>
         <p>Đăng ký để mua hàng và theo dõi trạng thái đơn hàng.</p>
+
+        {errorMsg && <div className="error-message" style={{ color: 'red', marginBottom: '15px' }}>{errorMsg}</div>}
 
         <form className="auth-form" onSubmit={handleSubmit}>
           <label htmlFor="fullName">Họ và tên</label>
