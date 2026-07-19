@@ -9,6 +9,7 @@ import NotFoundPage from './pages/NotFoundPage'
 import ProductDetailPage from './pages/ProductDetailPage'
 import ProductsPage from './pages/ProductsPage'
 import RegisterPage from './pages/RegisterPage'
+import UserManagementPage from './pages/UserManagementPage'
 
 function App() {
   return (
@@ -22,6 +23,7 @@ function App() {
           <Route path="cart" element={<CartPage />} />
           <Route path="login" element={<LoginPage />} />
           <Route path="register" element={<RegisterPage />} />
+          <Route path="admin/users" element={<UserManagementPage />} />
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
         <Footer />
@@ -31,3 +33,4 @@ function App() {
 }
 
 export default App
+

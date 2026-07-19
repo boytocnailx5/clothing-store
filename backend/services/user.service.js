@@ -1,4 +1,5 @@
 const User = require('../models/user.model');
+const bcrypt = require('bcryptjs');
 
 class UserService {
   async getAllUsers() {
@@ -14,13 +15,23 @@ class UserService {
   }
 
   async createUser(userData) {
-    // Trong thực tế cần hash password bằng bcrypt trước khi lưu
+    if (userData.Password) {
+      const salt = await bcrypt.genSalt(10);
+      userData.PasswordHash = await bcrypt.hash(userData.Password, salt);
+    }
     return await User.create(userData);
   }
 
   async updateUser(userId, updateData) {
     const user = await User.findByPk(userId);
     if (!user) return null;
+
+    if (updateData.Password) {
+      const salt = await bcrypt.genSalt(10);
+      updateData.PasswordHash = await bcrypt.hash(updateData.Password, salt);
+      delete updateData.Password;
+    }
+
     return await user.update(updateData);
   }
 
@@ -33,3 +44,4 @@ class UserService {
 }
 
 module.exports = new UserService();
+

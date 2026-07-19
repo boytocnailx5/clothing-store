@@ -42,7 +42,7 @@ function LoginPage() {
       login(user, token);
 
       if (user.role === "ADMIN") {
-        navigate("/admin");
+        navigate("/admin/users");
       } else {
         navigate("/");
       }
