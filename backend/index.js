@@ -11,8 +11,13 @@ const PORT = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 
+const path = require('path');
+
 // Routes
 app.use('/api', routes);
+
+// Phục vụ các file tĩnh (ảnh đã upload)
+app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
 
 app.get('/', (req, res) => {
   res.send('Welcome to the Clothing Store Backend API!');

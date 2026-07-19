@@ -1,0 +1,157 @@
+.admin-page {
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.admin-page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.admin-page-title {
+  font-size: 1.8rem;
+  font-weight: 800;
+  margin: 0;
+  color: var(--ink, #171717);
+}
+
+.admin-btn {
+  padding: 0.6rem 1.2rem;
+  border-radius: 8px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
+}
+
+.admin-btn.primary {
+  background-color: var(--ink, #171717);
+  color: #fff;
+}
+
+.admin-btn.primary:hover {
+  background-color: #333;
+}
+
+.admin-btn.secondary {
+  background-color: #e5e7eb;
+  color: #374151;
+}
+
+.admin-btn.secondary:hover {
+  background-color: #d1d5db;
+}
+
+.form-card {
+  max-width: 600px;
+}
+
+.admin-form .form-group {
+  margin-bottom: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.admin-form label {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: #4b5563;
+}
+
+.admin-form input,
+.admin-form textarea,
+.admin-form select {
+  padding: 0.8rem;
+  border: 1px solid var(--line, #dedbd5);
+  border-radius: 8px;
+  background-color: #f9fafb;
+  font-family: inherit;
+}
+
+.admin-form input:focus,
+.admin-form textarea:focus {
+  outline: none;
+  border-color: var(--ink);
+  background-color: #fff;
+}
+
+.form-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.admin-table-container {
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid var(--line, #dedbd5);
+  overflow-x: auto;
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.admin-table th,
+.admin-table td {
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid var(--line, #dedbd5);
+}
+
+.admin-table th {
+  background-color: #f9fafb;
+  font-weight: 600;
+  color: #4b5563;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.admin-table tr:last-child td {
+  border-bottom: none;
+}
+
+.admin-table tbody tr:hover {
+  background-color: #f9fafb;
+}
+
+.actions-cell {
+  display: flex;
+  gap: 1rem;
+}
+
+.text-btn {
+  background: none;
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+}
+
+.text-btn.edit {
+  color: #2563eb;
+}
+
+.text-btn.delete {
+  color: #dc2626;
+}
+
+.text-btn:hover {
+  text-decoration: underline;
+}
+
+.empty-message {
+  text-align: center;
+  color: var(--muted);
+  padding: 2rem !important;
+}
