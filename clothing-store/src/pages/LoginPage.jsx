@@ -1,9 +1,11 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axiosClient from "../api/axiosClient";
+import useAuth from "../contexts/useAuth";
 
 function LoginPage() {
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const [formData, setFormData] = useState({
     email: "",
@@ -34,14 +36,12 @@ function LoginPage() {
         password: formData.password
       });
 
-      const { token, user } = response.data;
+      const { token, user } = response.data.data;
 
-      localStorage.setItem("accessToken", token);
-      localStorage.setItem("user", JSON.stringify(user));
+      // Gọi hàm login từ AuthContext để lưu state và localStorage
+      login(user, token);
 
-      alert("Đăng nhập thành công");
-
-      if (user.Role === "ADMIN") {
+      if (user.role === "ADMIN") {
         navigate("/admin");
       } else {
         navigate("/");
