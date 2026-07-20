@@ -9,6 +9,8 @@ const Color = require('./color.model');
 const ProductImage = require('./productImage.model');
 const ProductVariant = require('./productVariant.model');
 
+const Address = require('./address.model');
+
 // Thiết lập các relationships ở đây
 Category.hasMany(Category, { as: 'SubCategories', foreignKey: 'ParentId' });
 Category.belongsTo(Category, { as: 'ParentCategory', foreignKey: 'ParentId' });
@@ -16,8 +18,11 @@ Category.belongsTo(Category, { as: 'ParentCategory', foreignKey: 'ParentId' });
 Category.hasMany(Product, { foreignKey: 'CategoryId', as: 'Products' });
 Product.belongsTo(Category, { foreignKey: 'CategoryId', as: 'Category' });
 
-User.hasMany(Order, { foreignKey: 'UserId' });
-Order.belongsTo(User, { foreignKey: 'UserId' });
+User.hasMany(Order, { foreignKey: 'UserId', as: 'Orders' });
+Order.belongsTo(User, { foreignKey: 'UserId', as: 'User' });
+
+User.hasMany(Address, { foreignKey: 'UserId', as: 'Addresses' });
+Address.belongsTo(User, { foreignKey: 'UserId', as: 'User' });
 
 // Product - ProductImage
 Product.hasMany(ProductImage, { foreignKey: 'ProductId', as: 'Images', onDelete: 'CASCADE' });
@@ -40,6 +45,7 @@ const db = {
   Category,
   Product,
   Order,
+  Address,
   Size,
   Color,
   ProductImage,
