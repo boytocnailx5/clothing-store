@@ -24,10 +24,13 @@ class CouponController {
 
   async create(req, res) {
     try {
+      console.log('CREATE COUPON PAYLOAD:', JSON.stringify(req.body, null, 2));
       const newCoupon = await couponService.createCoupon(req.body);
       res.status(201).json({ success: true, data: newCoupon });
     } catch (error) {
-      res.status(400).json({ success: false, message: error.message });
+      console.error('CREATE COUPON ERROR:', error.message);
+      if (error.errors) error.errors.forEach(e => console.error(' -', e.message));
+      res.status(400).json({ success: false, message: error.errors ? error.errors.map(e => e.message).join(', ') : error.message });
     }
   }
 
