@@ -3,7 +3,8 @@ const userService = require('../services/user.service');
 class UserController {
   async getAll(req, res) {
     try {
-      const users = await userService.getAllUsers();
+      const search = req.query.search || '';
+      const users = await userService.getAllUsers(search);
       res.status(200).json({ success: true, data: users });
     } catch (error) {
       res.status(500).json({ success: false, message: error.message });
@@ -14,7 +15,7 @@ class UserController {
     try {
       const user = await userService.getUserById(req.params.id);
       if (!user) {
-        return res.status(404).json({ success: false, message: 'User not found' });
+        return res.status(404).json({ success: false, message: 'Người dùng không tồn tại' });
       }
       res.status(200).json({ success: true, data: user });
     } catch (error) {
@@ -25,7 +26,6 @@ class UserController {
   async create(req, res) {
     try {
       const newUser = await userService.createUser(req.body);
-      // Remove password hash from response
       const userData = newUser.toJSON();
       delete userData.PasswordHash;
       res.status(201).json({ success: true, data: userData });
@@ -38,7 +38,7 @@ class UserController {
     try {
       const updatedUser = await userService.updateUser(req.params.id, req.body);
       if (!updatedUser) {
-        return res.status(404).json({ success: false, message: 'User not found' });
+        return res.status(404).json({ success: false, message: 'Người dùng không tồn tại' });
       }
       const userData = updatedUser.toJSON();
       delete userData.PasswordHash;
@@ -48,13 +48,31 @@ class UserController {
     }
   }
 
+  async toggleStatus(req, res) {
+    try {
+      const updatedUser = await userService.toggleUserStatus(req.params.id);
+      if (!updatedUser) {
+        return res.status(404).json({ success: false, message: 'Người dùng không tồn tại' });
+      }
+      const userData = updatedUser.toJSON();
+      delete userData.PasswordHash;
+      res.status(200).json({ 
+        success: true, 
+        message: `Đã ${userData.Status === 'ACTIVE' ? 'mở khóa' : 'khóa'} tài khoản thành công`, 
+        data: userData 
+      });
+    } catch (error) {
+      res.status(500).json({ success: false, message: error.message });
+    }
+  }
+
   async delete(req, res) {
     try {
       const result = await userService.deleteUser(req.params.id);
       if (!result) {
-        return res.status(404).json({ success: false, message: 'User not found' });
+        return res.status(404).json({ success: false, message: 'Người dùng không tồn tại' });
       }
-      res.status(200).json({ success: true, message: 'User deleted successfully' });
+      res.status(200).json({ success: true, message: 'Xóa tài khoản người dùng thành công' });
     } catch (error) {
       res.status(500).json({ success: false, message: error.message });
     }
