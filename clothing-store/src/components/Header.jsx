@@ -24,6 +24,9 @@ function Header() {
           <NavLink to="/products">Sản phẩm</NavLink>
           <a href="/#categories">Danh mục</a>
           <a href="/#about">Giới thiệu</a>
+          {user && (user.role === 'ADMIN' || user.Role === 'ADMIN') && (
+            <NavLink to="/admin/users">Quản lý User</NavLink>
+          )}
         </nav>
 
         <div className="header-actions">
