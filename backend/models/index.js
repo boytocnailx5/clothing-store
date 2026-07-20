@@ -10,7 +10,9 @@ const ProductImage = require('./productImage.model');
 const ProductVariant = require('./productVariant.model');
 
 const Address = require('./address.model');
-
+const Coupon = require('./coupon.model');
+const CouponCategory = require('./couponCategory.model');
+const CouponProduct = require('./couponProduct.model');
 // Thiết lập các relationships ở đây
 Category.hasMany(Category, { as: 'SubCategories', foreignKey: 'ParentId' });
 Category.belongsTo(Category, { as: 'ParentCategory', foreignKey: 'ParentId' });
@@ -39,6 +41,16 @@ ProductVariant.belongsTo(Size, { foreignKey: 'SizeId', as: 'Size' });
 Color.hasMany(ProductVariant, { foreignKey: 'ColorId', as: 'Variants' });
 ProductVariant.belongsTo(Color, { foreignKey: 'ColorId', as: 'Color' });
 
+// Coupons
+Coupon.hasMany(Order, { foreignKey: 'CouponId', as: 'Orders' });
+Order.belongsTo(Coupon, { foreignKey: 'CouponId', as: 'Coupon' });
+
+Coupon.belongsToMany(Category, { through: CouponCategory, foreignKey: 'CouponId', as: 'Categories' });
+Category.belongsToMany(Coupon, { through: CouponCategory, foreignKey: 'CategoryId', as: 'Coupons' });
+
+Coupon.belongsToMany(Product, { through: CouponProduct, foreignKey: 'CouponId', as: 'Products' });
+Product.belongsToMany(Coupon, { through: CouponProduct, foreignKey: 'ProductId', as: 'Coupons' });
+
 const db = {
   sequelize,
   User,
@@ -49,7 +61,10 @@ const db = {
   Size,
   Color,
   ProductImage,
-  ProductVariant
+  ProductVariant,
+  Coupon,
+  CouponCategory,
+  CouponProduct
 };
 
 module.exports = db;

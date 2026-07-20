@@ -30,6 +30,9 @@ function AdminLayout() {
           <NavLink to="/admin/users">
             Quản lý Người dùng
           </NavLink>
+          <NavLink to="/admin/coupons">
+            Quản lý Khuyến mãi
+          </NavLink>
           <NavLink to="/">
             Về trang cửa hàng
           </NavLink>

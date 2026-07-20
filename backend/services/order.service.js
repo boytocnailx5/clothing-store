@@ -1,5 +1,4 @@
-const Order = require('../models/order.model');
-// Có thể require User, OrderItem nếu cần join
+const { Order, Coupon, sequelize } = require('../models');
 
 class OrderService {
   async getAllOrders() {
@@ -11,7 +10,23 @@ class OrderService {
   }
 
   async createOrder(orderData) {
-    return await Order.create(orderData);
+    const transaction = await sequelize.transaction();
+    try {
+      const order = await Order.create(orderData, { transaction });
+      
+      if (orderData.CouponId) {
+        const coupon = await Coupon.findByPk(orderData.CouponId, { transaction });
+        if (coupon) {
+          await coupon.increment('UsedCount', { by: 1, transaction });
+        }
+      }
+      
+      await transaction.commit();
+      return order;
+    } catch (error) {
+      await transaction.rollback();
+      throw error;
+    }
   }
 
   async updateOrder(orderId, updateData) {
