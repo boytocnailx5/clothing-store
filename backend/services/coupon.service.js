@@ -37,13 +37,17 @@ class CouponService {
   async createCoupon(data) {
     const transaction = await sequelize.transaction();
     try {
-      const coupon = await Coupon.create(data, { transaction });
+      // Tách CategoryIds và ProductIds ra khỏi data trước khi tạo Coupon
+      // để tránh Sequelize ValidationError khi gặp field không có trong model
+      const { CategoryIds, ProductIds, ...couponData } = data;
 
-      if (data.ApplyTo === 'CATEGORY' && data.CategoryIds && data.CategoryIds.length > 0) {
-        const categories = data.CategoryIds.map(id => ({ CouponId: coupon.CouponId, CategoryId: id }));
+      const coupon = await Coupon.create(couponData, { transaction });
+
+      if (couponData.ApplyTo === 'CATEGORY' && CategoryIds && CategoryIds.length > 0) {
+        const categories = CategoryIds.map(id => ({ CouponId: coupon.CouponId, CategoryId: id }));
         await CouponCategory.bulkCreate(categories, { transaction });
-      } else if (data.ApplyTo === 'PRODUCT' && data.ProductIds && data.ProductIds.length > 0) {
-        const products = data.ProductIds.map(id => ({ CouponId: coupon.CouponId, ProductId: id }));
+      } else if (couponData.ApplyTo === 'PRODUCT' && ProductIds && ProductIds.length > 0) {
+        const products = ProductIds.map(id => ({ CouponId: coupon.CouponId, ProductId: id }));
         await CouponProduct.bulkCreate(products, { transaction });
       }
 
@@ -61,21 +65,24 @@ class CouponService {
       const coupon = await Coupon.findByPk(id);
       if (!coupon) throw new Error('Coupon not found');
 
-      await coupon.update(data, { transaction });
+      // Tách CategoryIds và ProductIds ra khỏi data trước khi update
+      const { CategoryIds, ProductIds, ...couponData } = data;
 
-      if (data.ApplyTo === 'CATEGORY') {
+      await coupon.update(couponData, { transaction });
+
+      if (couponData.ApplyTo === 'CATEGORY') {
         await CouponCategory.destroy({ where: { CouponId: id }, transaction });
-        if (data.CategoryIds && data.CategoryIds.length > 0) {
-          const categories = data.CategoryIds.map(catId => ({ CouponId: id, CategoryId: catId }));
+        if (CategoryIds && CategoryIds.length > 0) {
+          const categories = CategoryIds.map(catId => ({ CouponId: id, CategoryId: catId }));
           await CouponCategory.bulkCreate(categories, { transaction });
         }
-      } else if (data.ApplyTo === 'PRODUCT') {
+      } else if (couponData.ApplyTo === 'PRODUCT') {
         await CouponProduct.destroy({ where: { CouponId: id }, transaction });
-        if (data.ProductIds && data.ProductIds.length > 0) {
-          const products = data.ProductIds.map(prodId => ({ CouponId: id, ProductId: prodId }));
+        if (ProductIds && ProductIds.length > 0) {
+          const products = ProductIds.map(prodId => ({ CouponId: id, ProductId: prodId }));
           await CouponProduct.bulkCreate(products, { transaction });
         }
-      } else if (data.ApplyTo === 'ALL') {
+      } else if (couponData.ApplyTo === 'ALL') {
         await CouponCategory.destroy({ where: { CouponId: id }, transaction });
         await CouponProduct.destroy({ where: { CouponId: id }, transaction });
       }
