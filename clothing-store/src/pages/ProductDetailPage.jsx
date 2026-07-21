@@ -11,6 +11,7 @@ function ProductDetailPage() {
   const { addToCart } = useCart()
   const [size, setSize] = useState('')
   const [color, setColor] = useState('')
+  const [selectedImage, setSelectedImage] = useState('')
   const [message, setMessage] = useState('')
 
   useEffect(() => {
@@ -24,14 +25,20 @@ function ProductDetailPage() {
         if (res.data.success && res.data.data) {
           const mapped = mapBackendProduct(res.data.data)
           setProduct(mapped)
+          const initialColor = mapped.colors[0] || ''
           setSize(mapped.sizes[0] || '')
-          setColor(mapped.colors[0] || '')
+          setColor(initialColor)
+          
+          // Select initial main image
+          const matchingImg = mapped.images.find(img => img.colorName && img.colorName.toLowerCase() === initialColor.toLowerCase())
+          setSelectedImage(matchingImg ? matchingImg.url : mapped.image)
         } else {
           const fallback = staticProducts.find((item) => item.id === Number(id))
           setProduct(fallback || null)
           if (fallback) {
             setSize(fallback.sizes[0] || '')
             setColor(fallback.colors[0] || '')
+            setSelectedImage(fallback.image)
           }
         }
       } catch (err) {
@@ -42,6 +49,7 @@ function ProductDetailPage() {
           if (fallback) {
             setSize(fallback.sizes[0] || '')
             setColor(fallback.colors[0] || '')
+            setSelectedImage(fallback.image)
           }
         }
       } finally {
@@ -54,6 +62,27 @@ function ProductDetailPage() {
       isMounted = false
     }
   }, [id])
+
+  // Handle color change: auto switch image if matching color image exists
+  const handleColorChange = (newColor) => {
+    setColor(newColor)
+    if (product && product.images) {
+      const match = product.images.find(
+        (img) => img.colorName && img.colorName.toLowerCase() === newColor.toLowerCase()
+      )
+      if (match) {
+        setSelectedImage(match.url)
+      }
+    }
+  }
+
+  // Handle thumbnail click: switch main image and optionally switch color
+  const handleThumbnailClick = (img) => {
+    setSelectedImage(img.url)
+    if (img.colorName && product.colors.includes(img.colorName)) {
+      setColor(img.colorName)
+    }
+  }
 
   if (loading) {
     return (
@@ -87,8 +116,28 @@ function ProductDetailPage() {
     <main className="page-main">
       <section className="section">
         <div className="container product-detail">
-          <div className="product-detail-image">
-            <img src={product.image} alt={product.name} />
+          <div className="product-detail-media">
+            <div className="product-detail-image">
+              <img src={selectedImage || product.image} alt={product.name} />
+            </div>
+
+            {/* THUMBNAIL GALLERY */}
+            {product.images && product.images.length > 1 && (
+              <div className="product-thumbnails-gallery">
+                {product.images.map((img, idx) => (
+                  <button
+                    key={img.id || idx}
+                    type="button"
+                    className={`thumbnail-btn ${selectedImage === img.url ? 'active' : ''}`}
+                    onClick={() => handleThumbnailClick(img)}
+                    title={img.colorName ? `Màu: ${img.colorName}` : 'Ảnh sản phẩm'}
+                  >
+                    <img src={img.url} alt={`Thumbnail ${idx + 1}`} />
+                    {img.colorName && <span className="thumb-color-tag">{img.colorName}</span>}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
           <div className="product-detail-info">
@@ -105,11 +154,15 @@ function ProductDetailPage() {
 
             <div className="option-group">
               <label htmlFor="color">Màu sắc</label>
-              <select id="color" value={color} onChange={(e) => setColor(e.target.value)}>
-                {product.colors.map((item) => (
-                  <option key={item}>{item}</option>
-                ))}
-              </select>
+              <div className="color-options-wrap">
+                <select id="color" value={color} onChange={(e) => handleColorChange(e.target.value)}>
+                  {product.colors.map((item) => (
+                    <option key={item} value={item}>
+                      {item}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
 
             <div className="option-group">

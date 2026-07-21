@@ -90,9 +90,17 @@ export function mapBackendProduct(p) {
   if (!p) return null
   
   let rawImg = null
+  let imagesList = []
   if (p.Images && p.Images.length > 0) {
     const primary = p.Images.find((img) => img.IsPrimary)
     rawImg = primary ? primary.ImageUrl : p.Images[0].ImageUrl
+    imagesList = p.Images.map((img) => ({
+      id: img.ImageId,
+      url: formatImageUrl(img.ImageUrl),
+      colorName: img.ColorName || null,
+      isPrimary: !!img.IsPrimary,
+      sortOrder: img.SortOrder || 0
+    }))
   }
   const image = formatImageUrl(rawImg)
 
@@ -110,6 +118,13 @@ export function mapBackendProduct(p) {
     })
   }
 
+  // If imagesList has colorNames defined, ensure colorsSet includes them
+  imagesList.forEach(img => {
+    if (img.colorName && img.colorName !== 'Mặc định') {
+      colorsSet.add(img.colorName)
+    }
+  })
+
   return {
     id: p.ProductId,
     name: p.ProductName,
@@ -119,6 +134,7 @@ export function mapBackendProduct(p) {
     oldPrice: oldPrice,
     basePrice: basePrice,
     image: image,
+    images: imagesList.length > 0 ? imagesList : [{ id: 1, url: image, colorName: null, isPrimary: true, sortOrder: 0 }],
     description: p.Description || 'Sản phẩm thời trang cao cấp, phong cách và hiện đại.',
     colors: colorsSet.size > 0 ? Array.from(colorsSet) : ['Đen', 'Trắng'],
     sizes: sizesSet.size > 0 ? Array.from(sizesSet) : ['S', 'M', 'L', 'XL'],

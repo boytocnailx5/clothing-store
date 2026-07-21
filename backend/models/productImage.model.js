@@ -25,6 +25,14 @@ const ProductImage = sequelize.define('ProductImage', {
     allowNull: false,
     defaultValue: 0
   },
+  ColorName: {
+    type: DataTypes.STRING(50),
+    allowNull: true
+  },
+  ColorId: {
+    type: DataTypes.INTEGER,
+    allowNull: true
+  },
   CreatedAt: {
     type: DataTypes.DATE,
     allowNull: false,
