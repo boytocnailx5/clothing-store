@@ -115,7 +115,7 @@ class ProductService {
       distinct: true, // Crucial for correct count when including hasMany tables
       include: [
         { model: Category, as: 'Category', attributes: ['CategoryId', 'CategoryName', 'Slug'] },
-        { model: ProductImage, as: 'Images', attributes: ['ImageId', 'ImageUrl', 'IsPrimary', 'SortOrder'] },
+        { model: ProductImage, as: 'Images', attributes: ['ImageId', 'ImageUrl', 'IsPrimary', 'SortOrder', 'ColorName', 'ColorId'] },
         { 
           model: ProductVariant, 
           as: 'Variants',
@@ -296,12 +296,52 @@ class ProductService {
     }
   }
 
-  async deleteProduct(productId) {
-    const product = await Product.findByPk(productId);
-    if (!product) return null;
+  async getVariants(productId) {
+    return await ProductVariant.findAll({
+      where: { ProductId: productId },
+      include: [
+        { model: Size, as: 'Size' },
+        { model: Color, as: 'Color' }
+      ]
+    });
+  }
+
+  async updateVariant(variantId, updateData) {
+    const variant = await ProductVariant.findByPk(variantId);
+    if (!variant) throw new Error('Biến thể không tồn tại');
     
-    // Deletes CASCADE on DB level, but we make it clean.
-    await product.destroy();
+    if (updateData.SKU && updateData.SKU !== variant.SKU) {
+      const existingSKU = await ProductVariant.findOne({ 
+        where: { 
+          SKU: updateData.SKU,
+          VariantId: { [Op.ne]: variantId }
+        } 
+      });
+      if (existingSKU) {
+        throw new Error(`Mã SKU "${updateData.SKU}" đã được sử dụng ở biến thể khác`);
+      }
+    }
+
+    await variant.update(updateData);
+    return await ProductVariant.findByPk(variantId, {
+      include: [
+        { model: Size, as: 'Size' },
+        { model: Color, as: 'Color' }
+      ]
+    });
+  }
+
+  async toggleVariantStatus(variantId, isActive) {
+    const variant = await ProductVariant.findByPk(variantId);
+    if (!variant) throw new Error('Biến thể không tồn tại');
+    await variant.update({ IsActive: Boolean(isActive) });
+    return variant;
+  }
+
+  async deleteVariant(variantId) {
+    const variant = await ProductVariant.findByPk(variantId);
+    if (!variant) throw new Error('Biến thể không tồn tại');
+    await variant.destroy();
     return true;
   }
 }

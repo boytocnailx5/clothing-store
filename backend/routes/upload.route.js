@@ -29,4 +29,29 @@ router.post('/', authMiddleware, adminMiddleware, upload.single('image'), (req, 
   }
 });
 
+// POST /api/upload/multiple
+// Requires token and ADMIN role
+router.post('/multiple', authMiddleware, adminMiddleware, upload.array('images', 10), (req, res) => {
+  try {
+    if (!req.files || req.files.length === 0) {
+      return res.status(400).json({ success: false, message: 'Chưa có file nào được tải lên' });
+    }
+
+    const port = process.env.PORT || 5000;
+    const APP_URL = process.env.APP_URL || `http://localhost:${port}`;
+    const fileData = req.files.map(file => ({
+      url: `${APP_URL}/uploads/${file.filename}`,
+      filename: file.filename
+    }));
+
+    res.status(200).json({
+      success: true,
+      message: 'Upload nhiều file thành công',
+      data: fileData
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
 module.exports = router;

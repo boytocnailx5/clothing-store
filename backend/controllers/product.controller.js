@@ -73,6 +73,44 @@ class ProductController {
       res.status(500).json({ success: false, message: error.message });
     }
   }
+
+  // VARIANT CONTROLLERS
+  async getVariants(req, res) {
+    try {
+      const variants = await productService.getVariants(req.params.id);
+      res.status(200).json({ success: true, data: variants });
+    } catch (error) {
+      res.status(500).json({ success: false, message: error.message });
+    }
+  }
+
+  async updateVariant(req, res) {
+    try {
+      const updated = await productService.updateVariant(req.params.variantId, req.body);
+      res.status(200).json({ success: true, data: updated });
+    } catch (error) {
+      res.status(400).json({ success: false, message: error.message });
+    }
+  }
+
+  async toggleVariantStatus(req, res) {
+    try {
+      const { isActive } = req.body;
+      const updated = await productService.toggleVariantStatus(req.params.variantId, isActive);
+      res.status(200).json({ success: true, data: updated });
+    } catch (error) {
+      res.status(400).json({ success: false, message: error.message });
+    }
+  }
+
+  async deleteVariant(req, res) {
+    try {
+      await productService.deleteVariant(req.params.variantId);
+      res.status(200).json({ success: true, message: 'Variant deleted successfully' });
+    } catch (error) {
+      res.status(400).json({ success: false, message: error.message });
+    }
+  }
 }
 
 module.exports = new ProductController();
