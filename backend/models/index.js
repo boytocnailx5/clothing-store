@@ -13,6 +13,9 @@ const Address = require('./address.model');
 const Coupon = require('./coupon.model');
 const CouponCategory = require('./couponCategory.model');
 const CouponProduct = require('./couponProduct.model');
+const InventoryLog = require('./inventoryLog.model');
+const OrderItem = require('./orderItem.model');
+
 // Thiết lập các relationships ở đây
 Category.hasMany(Category, { as: 'SubCategories', foreignKey: 'ParentId' });
 Category.belongsTo(Category, { as: 'ParentCategory', foreignKey: 'ParentId' });
@@ -25,6 +28,18 @@ Order.belongsTo(User, { foreignKey: 'UserId', as: 'User' });
 
 User.hasMany(Address, { foreignKey: 'UserId', as: 'Addresses' });
 Address.belongsTo(User, { foreignKey: 'UserId', as: 'User' });
+
+// Order - OrderItem
+Order.hasMany(OrderItem, { foreignKey: 'OrderId', as: 'Items', onDelete: 'CASCADE' });
+OrderItem.belongsTo(Order, { foreignKey: 'OrderId' });
+
+OrderItem.belongsTo(ProductVariant, { foreignKey: 'VariantId', as: 'Variant' });
+OrderItem.belongsTo(Product, { foreignKey: 'ProductId', as: 'Product' });
+
+// InventoryLog relationships
+InventoryLog.belongsTo(ProductVariant, { foreignKey: 'VariantId', as: 'Variant' });
+InventoryLog.belongsTo(Product, { foreignKey: 'ProductId', as: 'Product' });
+ProductVariant.hasMany(InventoryLog, { foreignKey: 'VariantId', as: 'InventoryLogs' });
 
 // Product - ProductImage
 Product.hasMany(ProductImage, { foreignKey: 'ProductId', as: 'Images', onDelete: 'CASCADE' });
@@ -57,6 +72,8 @@ const db = {
   Category,
   Product,
   Order,
+  OrderItem,
+  InventoryLog,
   Address,
   Size,
   Color,
