@@ -18,14 +18,17 @@ function AdminLayout() {
           STYLE<span>ADMIN</span>
         </div>
         <nav className="admin-nav">
-          <NavLink to="/admin" end>
-            Bảng điều khiển
+          <NavLink to="/admin/products">
+            Quản lý Sản phẩm
           </NavLink>
           <NavLink to="/admin/categories">
             Quản lý Danh mục
           </NavLink>
           <NavLink to="/admin/products">
             Quản lý Sản phẩm
+          </NavLink>
+          <NavLink to="/admin/inventory">
+            Quản lý Tồn kho
           </NavLink>
           <NavLink to="/admin/users">
             Quản lý Người dùng

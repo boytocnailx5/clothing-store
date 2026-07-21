@@ -10,6 +10,7 @@ const orderRoute = require('./order.route');
 const uploadRoute = require('./upload.route');
 const couponRoute = require('./coupon.route');
 const attributeRoute = require('./attribute.route');
+const inventoryRoute = require('./inventory.route');
 
 // API Routes
 router.use('/auth', authRoute);
@@ -20,5 +21,6 @@ router.use('/orders', orderRoute);
 router.use('/upload', uploadRoute);
 router.use('/coupons', couponRoute);
 router.use('/attributes', attributeRoute);
+router.use('/inventory', inventoryRoute);
 
 module.exports = router;

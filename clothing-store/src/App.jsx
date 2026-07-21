@@ -1,14 +1,14 @@
-import { BrowserRouter, Route, Routes, Outlet } from 'react-router-dom';
+import { BrowserRouter, Route, Routes, Outlet, Navigate } from 'react-router-dom';
 import './App.css';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import ProtectedRoute from './components/ProtectedRoute';
 import AdminLayout from './layouts/AdminLayout';
-import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminCategories from './pages/admin/AdminCategories';
 import AdminProducts from './pages/admin/AdminProducts';
 import AdminUsers from './pages/admin/AdminUsers';
 import AdminCoupons from './pages/admin/AdminCoupons';
+import AdminInventory from './pages/admin/AdminInventory';
 import CartPage from './pages/CartPage';
 import HomePage from './pages/HomePage';
 import LoginPage from './pages/LoginPage';
@@ -46,9 +46,10 @@ function App() {
         {/* ADMIN ROUTES */}
         <Route element={<ProtectedRoute requireAdmin={true} />}>
           <Route path="/admin" element={<AdminLayout />}>
-            <Route index element={<AdminDashboard />} />
+            <Route index element={<Navigate to="/admin/products" replace />} />
             <Route path="categories" element={<AdminCategories />} />
             <Route path="products" element={<AdminProducts />} />
+            <Route path="inventory" element={<AdminInventory />} />
             <Route path="users" element={<AdminUsers />} />
             <Route path="coupons" element={<AdminCoupons />} />
           </Route>
