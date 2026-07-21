@@ -3,12 +3,13 @@ import { useCart } from '../contexts/useCart'
 import useAuth from '../contexts/useAuth'
 
 function Header() {
-  const { cartCount } = useCart()
+  const { cartCount, clearCart } = useCart()
   const { user, logout } = useAuth()
   const navigate = useNavigate()
 
   const handleLogout = () => {
     logout()
+    clearCart()
     navigate('/')
   }
 

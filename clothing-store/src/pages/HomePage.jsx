@@ -1,8 +1,10 @@
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import ProductCard from '../components/ProductCard'
-import { products } from '../data/products'
+import { products as staticProducts, mapBackendProduct } from '../data/products'
+import axiosClient from '../api/axiosClient'
 
-const categories = [
+const defaultCategories = [
   { name: 'Áo thun', description: 'Thoải mái mỗi ngày' },
   { name: 'Áo sơ mi', description: 'Lịch sự và hiện đại' },
   { name: 'Quần jean', description: 'Bền bỉ, dễ phối đồ' },
@@ -10,7 +12,49 @@ const categories = [
 ]
 
 function HomePage() {
-  const featuredProducts = products.filter((product) => product.featured)
+  const [featuredProducts, setFeaturedProducts] = useState([])
+  const [categories, setCategories] = useState(defaultCategories)
+
+  useEffect(() => {
+    let isMounted = true
+    const fetchData = async () => {
+      try {
+        const [prodRes, catRes] = await Promise.all([
+          axiosClient.get('/products?limit=100'),
+          axiosClient.get('/categories'),
+        ])
+
+        if (!isMounted) return
+
+        const backendProds = prodRes.data.products || []
+        const mapped = backendProds.map(mapBackendProduct)
+
+        if (mapped.length > 0) {
+          setFeaturedProducts(mapped.slice(0, 6))
+        } else {
+          setFeaturedProducts(staticProducts.filter((product) => product.featured))
+        }
+
+        if (catRes.data.data && catRes.data.data.length > 0) {
+          const apiCats = catRes.data.data.map((c) => ({
+            name: c.CategoryName,
+            description: c.Description || 'Phong cách thời trang độc đáo',
+          }))
+          setCategories(apiCats)
+        }
+      } catch (err) {
+        console.error('Error fetching home data:', err)
+        if (isMounted) {
+          setFeaturedProducts(staticProducts.filter((product) => product.featured))
+        }
+      }
+    }
+
+    fetchData()
+    return () => {
+      isMounted = false
+    }
+  }, [])
 
   return (
     <main>
@@ -53,7 +97,7 @@ function HomePage() {
           <div className="category-grid">
             {categories.map((category, index) => (
               <Link
-                className={`category-card category-${index + 1}`}
+                className={`category-card category-${(index % 4) + 1}`}
                 key={category.name}
                 to={`/products?category=${encodeURIComponent(category.name)}`}
               >
