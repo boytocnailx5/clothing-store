@@ -77,4 +77,53 @@ export const formatCurrency = (value) =>
   new Intl.NumberFormat('vi-VN', {
     style: 'currency',
     currency: 'VND',
-  }).format(value)
+  }).format(value || 0)
+
+export function formatImageUrl(url) {
+  if (!url) return 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=900&q=80'
+  if (url.startsWith('http://') || url.startsWith('https://')) return url
+  if (url.startsWith('/uploads')) return `http://localhost:5000${url}`
+  return url
+}
+
+export function mapBackendProduct(p) {
+  if (!p) return null
+  
+  let rawImg = null
+  if (p.Images && p.Images.length > 0) {
+    const primary = p.Images.find((img) => img.IsPrimary)
+    rawImg = primary ? primary.ImageUrl : p.Images[0].ImageUrl
+  }
+  const image = formatImageUrl(rawImg)
+
+  const basePrice = Number(p.BasePrice) || 0
+  const salePrice = p.SalePrice !== null && p.SalePrice !== undefined && Number(p.SalePrice) > 0 ? Number(p.SalePrice) : null
+  const price = salePrice ? salePrice : basePrice
+  const oldPrice = salePrice ? basePrice : null
+
+  const sizesSet = new Set()
+  const colorsSet = new Set()
+  if (p.Variants && p.Variants.length > 0) {
+    p.Variants.forEach((v) => {
+      if (v.Size && v.Size.SizeName) sizesSet.add(v.Size.SizeName)
+      if (v.Color && v.Color.ColorName) colorsSet.add(v.Color.ColorName)
+    })
+  }
+
+  return {
+    id: p.ProductId,
+    name: p.ProductName,
+    category: p.Category ? p.Category.CategoryName : 'Thời trang',
+    categoryId: p.CategoryId,
+    price: price,
+    oldPrice: oldPrice,
+    basePrice: basePrice,
+    image: image,
+    description: p.Description || 'Sản phẩm thời trang cao cấp, phong cách và hiện đại.',
+    colors: colorsSet.size > 0 ? Array.from(colorsSet) : ['Đen', 'Trắng'],
+    sizes: sizesSet.size > 0 ? Array.from(sizesSet) : ['S', 'M', 'L', 'XL'],
+    featured: true,
+    raw: p,
+  }
+}
+

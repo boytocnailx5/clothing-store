@@ -1,19 +1,67 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import ProductCard from '../components/ProductCard'
-import { products } from '../data/products'
+import { products as staticProducts, mapBackendProduct } from '../data/products'
+import axiosClient from '../api/axiosClient'
 
 function ProductsPage() {
   const [searchParams] = useSearchParams()
   const categoryFromUrl = searchParams.get('category') || 'Tất cả'
   const [search, setSearch] = useState('')
   const [category, setCategory] = useState(categoryFromUrl)
+  const [allProducts, setAllProducts] = useState([])
+  const [dbCategories, setDbCategories] = useState([])
+  const [loading, setLoading] = useState(true)
 
-  const categories = ['Tất cả', ...new Set(products.map((item) => item.category))]
+  useEffect(() => {
+    let isMounted = true
+    const fetchData = async () => {
+      try {
+        setLoading(true)
+        const [prodRes, catRes] = await Promise.all([
+          axiosClient.get('/products?limit=100'),
+          axiosClient.get('/categories'),
+        ])
+
+        if (!isMounted) return
+
+        const backendProds = prodRes.data.products || []
+        const mapped = backendProds.map(mapBackendProduct)
+
+        if (mapped.length > 0) {
+          setAllProducts(mapped)
+        } else {
+          setAllProducts(staticProducts)
+        }
+
+        if (catRes.data.data) {
+          setDbCategories(catRes.data.data.map((c) => c.CategoryName))
+        }
+      } catch (err) {
+        console.error('Error fetching products:', err)
+        if (isMounted) {
+          setAllProducts(staticProducts)
+        }
+      } finally {
+        if (isMounted) setLoading(false)
+      }
+    }
+
+    fetchData()
+    return () => {
+      isMounted = false
+    }
+  }, [])
+
+  const categories = useMemo(() => {
+    const set = new Set(allProducts.map((item) => item.category))
+    dbCategories.forEach((cat) => set.add(cat))
+    return ['Tất cả', ...Array.from(set)]
+  }, [allProducts, dbCategories])
 
   const filteredProducts = useMemo(
     () =>
-      products.filter((product) => {
+      allProducts.filter((product) => {
         const matchSearch = product.name
           .toLowerCase()
           .includes(search.trim().toLowerCase())
@@ -22,7 +70,7 @@ function ProductsPage() {
 
         return matchSearch && matchCategory
       }),
-    [category, search],
+    [allProducts, category, search],
   )
 
   return (
@@ -58,20 +106,22 @@ function ProductsPage() {
             </select>
           </div>
 
-          <p className="result-count">Tìm thấy {filteredProducts.length} sản phẩm</p>
+          <p className="result-count">
+            {loading ? 'Đang tải sản phẩm...' : `Tìm thấy ${filteredProducts.length} sản phẩm`}
+          </p>
 
-          {filteredProducts.length > 0 ? (
+          {!loading && filteredProducts.length > 0 ? (
             <div className="product-grid">
               {filteredProducts.map((product) => (
                 <ProductCard key={product.id} product={product} />
               ))}
             </div>
-          ) : (
+          ) : !loading ? (
             <div className="empty-state">
               <h2>Không tìm thấy sản phẩm</h2>
               <p>Hãy thử từ khóa hoặc danh mục khác.</p>
             </div>
-          )}
+          ) : null}
         </div>
       </section>
     </main>

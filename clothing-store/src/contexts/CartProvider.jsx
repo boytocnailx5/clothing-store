@@ -1,8 +1,21 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useState, useEffect } from 'react'
 import { CartContext } from './CartContext'
+import useAuth from './useAuth'
 
 function CartProvider({ children }) {
   const [items, setItems] = useState([])
+  const { user } = useAuth()
+
+  // Xóa giỏ hàng khi người dùng đăng xuất hoặc chưa đăng nhập
+  useEffect(() => {
+    if (!user) {
+      setItems([])
+    }
+  }, [user])
+
+  const clearCart = () => {
+    setItems([])
+  }
 
   const addToCart = (product, size, color) => {
     setItems((currentItems) => {
@@ -53,6 +66,7 @@ function CartProvider({ children }) {
       addToCart,
       updateQuantity,
       removeItem,
+      clearCart,
       cartCount,
       totalPrice,
     }),

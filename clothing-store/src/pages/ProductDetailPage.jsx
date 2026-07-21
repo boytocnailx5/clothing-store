@@ -1,15 +1,69 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { useCart } from '../contexts/useCart'
-import { formatCurrency, products } from '../data/products'
+import { formatCurrency, products as staticProducts, mapBackendProduct } from '../data/products'
+import axiosClient from '../api/axiosClient'
 
 function ProductDetailPage() {
   const { id } = useParams()
-  const product = products.find((item) => item.id === Number(id))
+  const [product, setProduct] = useState(null)
+  const [loading, setLoading] = useState(true)
   const { addToCart } = useCart()
-  const [size, setSize] = useState(product?.sizes[0] || '')
-  const [color, setColor] = useState(product?.colors[0] || '')
+  const [size, setSize] = useState('')
+  const [color, setColor] = useState('')
   const [message, setMessage] = useState('')
+
+  useEffect(() => {
+    let isMounted = true
+    const fetchProduct = async () => {
+      try {
+        setLoading(true)
+        const res = await axiosClient.get(`/products/${id}`)
+        if (!isMounted) return
+
+        if (res.data.success && res.data.data) {
+          const mapped = mapBackendProduct(res.data.data)
+          setProduct(mapped)
+          setSize(mapped.sizes[0] || '')
+          setColor(mapped.colors[0] || '')
+        } else {
+          const fallback = staticProducts.find((item) => item.id === Number(id))
+          setProduct(fallback || null)
+          if (fallback) {
+            setSize(fallback.sizes[0] || '')
+            setColor(fallback.colors[0] || '')
+          }
+        }
+      } catch (err) {
+        console.error('Error fetching product detail:', err)
+        if (isMounted) {
+          const fallback = staticProducts.find((item) => item.id === Number(id))
+          setProduct(fallback || null)
+          if (fallback) {
+            setSize(fallback.sizes[0] || '')
+            setColor(fallback.colors[0] || '')
+          }
+        }
+      } finally {
+        if (isMounted) setLoading(false)
+      }
+    }
+
+    fetchProduct()
+    return () => {
+      isMounted = false
+    }
+  }, [id])
+
+  if (loading) {
+    return (
+      <main className="page-main">
+        <div className="container empty-state">
+          <p>Đang tải chi tiết sản phẩm...</p>
+        </div>
+      </main>
+    )
+  }
 
   if (!product) {
     return (
